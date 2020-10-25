@@ -1,12 +1,12 @@
 use crate::client::PoeClient;
 use crate::response::PoeResult;
 
+use chrono::{DateTime, Utc};
 use serde::Deserialize;
-use chrono::{ DateTime, Utc };
 
 #[derive(Debug, Deserialize)]
 pub struct ItemsResponse {
-    items: Vec<Item>
+    items: Vec<Item>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -61,7 +61,7 @@ pub struct Item {
     #[serde(default)]
     socket: i32,
     #[serde(default)]
-    color: String
+    color: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -69,12 +69,15 @@ pub struct Item {
 pub struct ItemSocket {
     group: u8,
     attr: String,
-    s_colour: SocketColor
+    s_colour: SocketColor,
 }
 
 #[derive(Debug, Deserialize)]
 pub enum SocketColor {
-    B, G, R, W
+    B,
+    G,
+    R,
+    W,
 }
 
 #[derive(Debug, Deserialize)]
@@ -88,21 +91,21 @@ pub struct League {
     start_at: DateTime<Utc>,
     end_at: Option<DateTime<Utc>>,
     delve_event: bool,
-    rules: Vec<LeagueRule>
+    rules: Vec<LeagueRule>,
 }
 
 #[derive(Debug, Deserialize)]
 struct LeagueRule {
     id: String,
     name: String,
-    description: String
+    description: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct LadderResponse {
     total: i32,
     cached_since: DateTime<Utc>,
-    entries: Vec<LadderEntry>
+    entries: Vec<LadderEntry>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -111,7 +114,7 @@ pub struct LadderEntry {
     dead: bool,
     online: bool,
     character: LadderEntryCharacter,
-    account: LadderEntryAccount
+    account: LadderEntryAccount,
 }
 
 #[derive(Debug, Deserialize)]
@@ -120,22 +123,30 @@ pub struct LadderEntryCharacter {
     name: String,
     level: u32,
     class: String,
-    experience: u64
+    experience: u64,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct LadderEntryAccount {
     name: String,
-    realm: String
+    realm: String,
 }
 
 pub struct PathOfExile {
-    client: PoeClient
+    client: PoeClient,
+}
+
+impl Default for PathOfExile {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl PathOfExile {
     pub fn new() -> PathOfExile {
-        PathOfExile { client: PoeClient::new() }
+        PathOfExile {
+            client: PoeClient::new(),
+        }
     }
 
     pub async fn get_items(&self, account_name: &str, character: &str) -> PoeResult<ItemsResponse> {
@@ -144,26 +155,38 @@ impl PathOfExile {
             account_name, character
         );
 
-        self.client.get(url).await
+        self.client.get("get_items", url).await
     }
 
     pub async fn leagues(&self, limit: u32, offset: u32) -> PoeResult<Vec<League>> {
-        self.client.get(&format!("/leagues?limit={}&offset={}", limit, offset)).await
+        self.client
+            .get(
+                "leagues",
+                &format!("/leagues?limit={}&offset={}", limit, offset),
+            )
+            .await
     }
 
     pub async fn ladder(&self, name: &str, limit: u32, offset: u32) -> PoeResult<LadderResponse> {
-        self.client.get(&format!("/ladders/{}?limit={}&offset={}", name, limit, offset)).await
+        self.client
+            .get(
+                "ladder",
+                &format!("/ladders/{}?limit={}&offset={}", name, limit, offset),
+            )
+            .await
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::PathOfExile;
+    use std::sync::Arc;
 
     #[tokio::test]
     async fn get_items() {
         let poe = PathOfExile::new();
 
+        // let's hope he doesn't change or delete the character
         let items = poe.get_items("Steelmage", "SteelDD").await.unwrap();
         assert_eq!(17, items.items.len());
     }
@@ -193,11 +216,33 @@ mod tests {
 
     #[tokio::test]
     async fn ladder() {
-        let poe = PathOfExile::new();
+        let poe = Arc::new(PathOfExile::new());
+
         let ladder = poe.ladder("Standard", 1, 0).await.unwrap();
 
         assert_eq!(15000, ladder.total);
         assert_eq!(1, ladder.entries.len());
         assert_eq!(1, ladder.entries.get(0).unwrap().rank);
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn ladder_rate_limit() {
+        let poe = Arc::new(PathOfExile::new());
+
+        let n = 6;
+
+        let mut threads = Vec::with_capacity(n);
+        for _ in 0..n {
+            let poe = Arc::clone(&poe);
+            threads.push(tokio::spawn(async move {
+                let ladder = poe.ladder("Standard", 1, 0).await.unwrap();
+                assert_eq!(15000, ladder.total);
+                assert_eq!(1, ladder.entries.len());
+                assert_eq!(1, ladder.entries.get(0).unwrap().rank);
+            }));
+        }
+
+        futures::future::join_all(threads).await;
     }
 }

@@ -1,4 +1,4 @@
-poe-api/Cargo.lock
+Cargo.lock
 target
 bin
 *.swp
