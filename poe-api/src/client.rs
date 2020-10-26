@@ -48,15 +48,15 @@ impl PoeClient {
             .rate_limiter
             .rate_limited(call_id, async { self.client.get(url).send().await })
             .await
-            .map_err(PoeError::Reqwest)?;
+            .map_err(PoeError::from)?;
 
         if response.status().is_success() {
-            return response.json::<T>().await.map_err(PoeError::Reqwest);
+            return response.json::<T>().await.map_err(PoeError::from);
         }
 
         match response.json::<ApiErrorResponse>().await {
-            Ok(error) => Err(PoeError::ApiError(error.error)),
-            Err(error) => Err(PoeError::Reqwest(error)),
+            Ok(error) => Err(PoeError::from(error.error)),
+            Err(error) => Err(PoeError::from(error)),
         }
     }
 }

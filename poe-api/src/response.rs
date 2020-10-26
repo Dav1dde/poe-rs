@@ -1,10 +1,24 @@
 use serde::Deserialize;
 use std::result::Result;
+use thiserror::Error;
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum PoeError {
-    ApiError(ApiError),
-    Reqwest(reqwest::Error),
+    #[error("the resource is not available")]
+    NotFound(ApiError),
+    #[error("unknown API error")]
+    UnknownApiError(ApiError),
+    #[error("unexpected transport or decoding error occured")]
+    Reqwest(#[from] reqwest::Error),
+}
+
+impl From<ApiError> for PoeError {
+    fn from(err: ApiError) -> PoeError {
+        match err.code {
+            1 => PoeError::NotFound(err),
+            _ => PoeError::UnknownApiError(err),
+        }
+    }
 }
 
 pub type PoeResult<T> = Result<T, PoeError>;
@@ -16,6 +30,6 @@ pub struct ApiErrorResponse {
 
 #[derive(Debug, Deserialize)]
 pub struct ApiError {
-    code: i32,
-    message: String,
+    pub code: i32,
+    pub message: String,
 }

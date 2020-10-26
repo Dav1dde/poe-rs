@@ -12,64 +12,64 @@ pub struct ItemsResponse {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Item {
-    verified: bool,
-    w: u8,
-    h: u8,
-    ilvl: u8,
-    icon: String,
-    league: String,
-    id: String,
+    pub verified: bool,
+    pub w: u8,
+    pub h: u8,
+    pub ilvl: u8,
+    pub icon: String,
+    pub league: String,
+    pub id: String,
     #[serde(default)]
-    elder: bool,
+    pub elder: bool,
     #[serde(default)]
-    shaper: bool,
+    pub shaper: bool,
     #[serde(default)]
-    fractured: bool,
+    pub fractured: bool,
     #[serde(default)]
-    sockets: Vec<ItemSocket>,
-    name: String,
-    type_line: String,
+    pub sockets: Vec<ItemSocket>,
+    pub name: String,
+    pub type_line: String,
     #[serde(default)]
-    identified: bool,
+    pub identified: bool,
     #[serde(default)]
-    corrupted: bool,
+    pub corrupted: bool,
     // properties
     #[serde(default)]
-    utility_mods: Vec<String>,
+    pub utility_mods: Vec<String>,
     #[serde(default)]
-    explicit_mods: Vec<String>,
+    pub explicit_mods: Vec<String>,
     #[serde(default)]
-    crafted_mods: Vec<String>,
+    pub crafted_mods: Vec<String>,
     #[serde(default)]
-    enchant_mods: Vec<String>,
+    pub enchant_mods: Vec<String>,
     #[serde(default)]
-    fractured_mods: Vec<String>,
+    pub fractured_mods: Vec<String>,
     #[serde(default)]
-    flavour_text: Vec<String>,
+    pub flavour_text: Vec<String>,
     #[serde(default)]
-    descr_text: String,
+    pub descr_text: String,
     #[serde(default)]
-    sec_descr_text: String,
-    frame_type: i32,
+    pub sec_descr_text: String,
+    pub frame_type: i32,
     // category
-    x: i32,
-    y: i32,
-    inventory_id: String,
+    pub x: i32,
+    pub y: i32,
+    pub inventory_id: String,
     #[serde(default)]
-    is_relic: bool,
+    pub is_relic: bool,
     // socketetedItems
     #[serde(default)]
-    socket: i32,
+    pub socket: i32,
     #[serde(default)]
-    color: String,
+    pub color: String,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ItemSocket {
-    group: u8,
-    attr: String,
-    s_colour: SocketColor,
+    pub group: u8,
+    pub attr: String,
+    pub s_colour: SocketColor,
 }
 
 #[derive(Debug, Deserialize)]
@@ -83,53 +83,53 @@ pub enum SocketColor {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct League {
-    id: String,
-    realm: String,
-    description: String,
-    register_at: DateTime<Utc>,
-    url: String,
-    start_at: DateTime<Utc>,
-    end_at: Option<DateTime<Utc>>,
-    delve_event: bool,
-    rules: Vec<LeagueRule>,
+    pub id: String,
+    pub realm: String,
+    pub description: String,
+    pub register_at: DateTime<Utc>,
+    pub url: String,
+    pub start_at: DateTime<Utc>,
+    pub end_at: Option<DateTime<Utc>>,
+    pub delve_event: bool,
+    pub rules: Vec<LeagueRule>,
 }
 
 #[derive(Debug, Deserialize)]
-struct LeagueRule {
-    id: String,
-    name: String,
-    description: String,
+pub struct LeagueRule {
+    pub id: String,
+    pub name: String,
+    pub description: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct LadderResponse {
-    total: i32,
-    cached_since: DateTime<Utc>,
-    entries: Vec<LadderEntry>,
+    pub total: usize,
+    pub cached_since: DateTime<Utc>,
+    pub entries: Vec<LadderEntry>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct LadderEntry {
-    rank: i32,
-    dead: bool,
-    online: bool,
-    character: LadderEntryCharacter,
-    account: LadderEntryAccount,
+    pub rank: i32,
+    pub dead: bool,
+    pub online: bool,
+    pub character: LadderEntryCharacter,
+    pub account: LadderEntryAccount,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct LadderEntryCharacter {
-    id: String,
-    name: String,
-    level: u32,
-    class: String,
-    experience: u64,
+    pub id: String,
+    pub name: String,
+    pub level: u32,
+    pub class: String,
+    pub experience: u64,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct LadderEntryAccount {
-    name: String,
-    realm: String,
+    pub name: String,
+    pub realm: String,
 }
 
 pub struct PathOfExile {
@@ -158,7 +158,7 @@ impl PathOfExile {
         self.client.get("get_items", url).await
     }
 
-    pub async fn leagues(&self, limit: u32, offset: u32) -> PoeResult<Vec<League>> {
+    pub async fn leagues(&self, limit: usize, offset: usize) -> PoeResult<Vec<League>> {
         self.client
             .get(
                 "leagues",
@@ -167,7 +167,12 @@ impl PathOfExile {
             .await
     }
 
-    pub async fn ladder(&self, name: &str, limit: u32, offset: u32) -> PoeResult<LadderResponse> {
+    pub async fn ladder(
+        &self,
+        name: &str,
+        limit: usize,
+        offset: usize,
+    ) -> PoeResult<LadderResponse> {
         self.client
             .get(
                 "ladder",
