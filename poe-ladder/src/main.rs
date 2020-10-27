@@ -1,9 +1,10 @@
 use clap::{App, Arg};
 use futures::stream::StreamExt;
-use poe_api::page::PagedStream;
+use poe_api::page::ParallelPagedStream;
 use poe_api::PathOfExile;
+use std::sync::Arc;
 
-#[tokio::main]
+#[tokio::main(core_threads = 4)]
 async fn main() {
     if let Err(err) = try_main().await {
         eprintln!("{}", err);
@@ -28,17 +29,20 @@ async fn try_main() -> Result<(), String> {
         )
         .get_matches();
 
-    let league_name = app.value_of("LEAGUE").unwrap();
+    let league_name = app.value_of("LEAGUE").unwrap().to_string();
     let print_delay = app
         .value_of("print-delay")
         .map(|delay| delay.parse::<u64>().expect("invalid delay"));
 
     let poe = PathOfExile::new();
 
-    let mut stream = PagedStream::new(200, Some(15000), |pr| {
-        let poe = &poe;
+    let poe = Arc::new(poe);
+
+    let mut stream = ParallelPagedStream::new(3, 200, Some(15000), move |pr| {
+        let poe = Arc::clone(&poe);
+        let league_name = league_name.clone();
         async move {
-            let ladder = poe.ladder(league_name, pr.limit, pr.offset).await.unwrap();
+            let ladder = poe.ladder(&league_name, pr.limit, pr.offset).await.unwrap();
             Some(ladder.entries.into_iter())
         }
     });
