@@ -1,8 +1,7 @@
 use clap::{App, Arg};
 use futures::stream::StreamExt;
-use poe_api::page::ParallelPagedStream;
+use poe_api::page::GoodPagedStream;
 use poe_api::PathOfExile;
-use std::sync::Arc;
 
 #[tokio::main(core_threads = 4)]
 async fn main() {
@@ -29,20 +28,17 @@ async fn try_main() -> Result<(), String> {
         )
         .get_matches();
 
-    let league_name = app.value_of("LEAGUE").unwrap().to_string();
+    let league_name = app.value_of("LEAGUE").unwrap();
     let print_delay = app
         .value_of("print-delay")
         .map(|delay| delay.parse::<u64>().expect("invalid delay"));
 
     let poe = PathOfExile::new();
 
-    let poe = Arc::new(poe);
-
-    let mut stream = ParallelPagedStream::new(3, 200, Some(15000), move |pr| {
-        let poe = Arc::clone(&poe);
-        let league_name = league_name.clone();
+    let mut stream = GoodPagedStream::new(5, 200, Some(15000), |pr| {
+        let poe = &poe;
         async move {
-            let ladder = poe.ladder(&league_name, pr.limit, pr.offset).await.unwrap();
+            let ladder = poe.ladder(league_name, pr.limit, pr.offset).await.unwrap();
             Some(ladder.entries.into_iter())
         }
     });
@@ -90,11 +86,11 @@ async fn try_main() -> Result<(), String> {
 
 fn row(symbol: &str, rank: &str, level: &str, character: &str, account: &str, experience: &str) {
     println!(
-        "| {} | {:>3} | {:>3} | {:<25} | {:<25} | {:<10} |",
+        "| {} | {:>5} | {:>3} | {:<25} | {:<25} | {:<10} |",
         symbol, rank, level, character, account, experience
     );
 }
 
 fn divider() {
-    println!("{:=<87}", "");
+    println!("{:=<89}", "");
 }

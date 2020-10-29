@@ -1,5 +1,6 @@
 use futures::channel::mpsc;
 use futures::sink::SinkExt;
+use futures::stream::FuturesOrdered;
 use futures::task::{Context, Poll, Spawn, SpawnExt};
 use futures::{Stream, StreamExt};
 use std::future::Future;
@@ -210,10 +211,105 @@ impl futures::task::Spawn for TokioSpawner {
     }
 }
 
+pub struct GoodPagedStream<F, Fut, Iter, T>
+where
+    F: Fn(PageRequest) -> Fut,
+    Fut: Future<Output = Option<Iter>>,
+    Iter: Iterator<Item = T>,
+{
+    worker_queue: FuturesOrdered<Fut>,
+    current_workload: usize,
+    current_iter: Option<Iter>,
+    active_futures: usize,
+    parallelism: usize,
+    limit: usize,
+    max: Option<usize>,
+    pager: F,
+}
+
+impl<F, Fut, Iter, T> GoodPagedStream<F, Fut, Iter, T>
+where
+    F: Fn(PageRequest) -> Fut,
+    Fut: Future<Output = Option<Iter>>,
+    Iter: Iterator<Item = T>,
+{
+    pub fn new(parallelism: usize, limit: usize, max: Option<usize>, pager: F) -> Self {
+        Self {
+            worker_queue: FuturesOrdered::new(),
+            current_workload: 0,
+            current_iter: None,
+            active_futures: 0,
+            parallelism,
+            limit,
+            max,
+            pager,
+        }
+    }
+}
+
+impl<F, Fut, Iter, T> Stream for GoodPagedStream<F, Fut, Iter, T>
+where
+    F: Fn(PageRequest) -> Fut,
+    Fut: Future<Output = Option<Iter>>,
+    Iter: Iterator<Item = T>,
+{
+    type Item = T;
+
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        let this = unsafe { self.get_unchecked_mut() };
+
+        while this.active_futures < this.parallelism {
+            let offset = this.current_workload * this.limit;
+
+            if offset >= this.max.unwrap_or(usize::MAX) {
+                break;
+            }
+
+            this.worker_queue.push((this.pager)(PageRequest {
+                limit: this.limit,
+                offset,
+            }));
+            this.current_workload += 1;
+            this.active_futures += 1;
+        }
+
+        let mut item = this.current_iter.as_mut().and_then(|iter| iter.next());
+
+        if item.is_none() {
+            item = match this.worker_queue.poll_next_unpin(cx) {
+                Poll::Ready(Some(elements)) => {
+                    this.active_futures -= 1;
+                    this.current_iter = elements;
+                    this.current_iter.as_mut().unwrap().next()
+                }
+                Poll::Ready(None) => None,
+                Poll::Pending => return Poll::Pending,
+            };
+        }
+
+        Poll::Ready(item)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use futures::StreamExt;
+
+    #[tokio::test]
+    async fn test_good_parallel() {
+        let mut ps = GoodPagedStream::new(5, 10, Some(100), |pr| async move {
+            tokio::time::delay_for(tokio::time::Duration::from_millis(1)).await;
+            Some(pr.offset..pr.offset + pr.limit)
+        });
+
+        let mut counter = 0;
+        while let Some(x) = ps.next().await {
+            assert_eq!(x, counter);
+            counter += 1;
+        }
+        assert_eq!(counter, 100);
+    }
 
     #[tokio::test]
     async fn test_parallel() {
