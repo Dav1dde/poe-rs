@@ -1,7 +1,7 @@
 use clap::{App, Arg};
-use futures::stream::StreamExt;
-use poe_api::page::GoodPagedStream;
-use poe_api::PathOfExile;
+use futures::stream::TryStreamExt;
+use poe_api::page::PagedStream;
+use poe_api::{PathOfExile, PoeError};
 
 #[tokio::main(core_threads = 4)]
 async fn main() {
@@ -11,7 +11,7 @@ async fn main() {
     }
 }
 
-async fn try_main() -> Result<(), String> {
+async fn try_main() -> Result<(), Box<dyn std::error::Error>> {
     let app = App::new("PoE Ladder")
         .arg(
             Arg::with_name("LEAGUE")
@@ -35,11 +35,11 @@ async fn try_main() -> Result<(), String> {
 
     let poe = PathOfExile::new();
 
-    let mut stream = GoodPagedStream::new(5, 200, Some(15000), |pr| {
+    let mut stream = PagedStream::new(5, 200, Some(15000), |pr| {
         let poe = &poe;
         async move {
             let ladder = poe.ladder(league_name, pr.limit, pr.offset).await.unwrap();
-            Some(ladder.entries.into_iter())
+            Ok::<_, PoeError>(ladder.entries.into_iter())
         }
     });
 
@@ -56,7 +56,7 @@ async fn try_main() -> Result<(), String> {
     );
     divider();
 
-    while let Some(entry) = stream.next().await {
+    while let Some(entry) = stream.try_next().await? {
         let symbol = match entry.dead {
             true => "\u{1F480}",
             false => match entry.online {
