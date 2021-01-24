@@ -33,6 +33,24 @@ while let Some(entry) = stream.next().await {
 }
 ```
 
+## poe-cli
+
+Tool for accessing the PoE API via command line.
+
+    $ ./poe-cli items dav1d_ ChristineWolcen | jq
+    {
+      "items": [
+        {
+          "verified": false,
+          "w": 2,
+          "h": 3,
+          "ilvl": 80,
+          ...
+        },
+        ...
+      ]
+    }
+
 
 ## poe-ladder
 

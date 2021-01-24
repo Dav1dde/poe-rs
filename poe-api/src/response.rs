@@ -10,6 +10,10 @@ pub enum PoeError {
     UnknownApiError(ApiError),
     #[error("unexpected transport or decoding error occured")]
     Reqwest(#[from] reqwest::Error),
+    #[error("deserialization error")]
+    Serde(#[from] serde_json::Error),
+    #[error("unknown")]
+    Unknown,
 }
 
 impl From<ApiError> for PoeError {

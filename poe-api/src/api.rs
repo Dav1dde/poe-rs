@@ -2,14 +2,15 @@ use crate::client::PoeClient;
 use crate::response::PoeResult;
 
 use chrono::{DateTime, Utc};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ItemsResponse {
     items: Vec<Item>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Item {
     pub verified: bool,
@@ -64,7 +65,7 @@ pub struct Item {
     pub color: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ItemSocket {
     pub group: u8,
@@ -72,7 +73,7 @@ pub struct ItemSocket {
     pub s_colour: SocketColor,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum SocketColor {
     B,
     G,
@@ -80,7 +81,149 @@ pub enum SocketColor {
     W,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PassivesResponse {
+    hashes: Vec<u32>,
+    items: Vec<Item>,
+    #[serde(rename = "skillTreeData")]
+    skill_tree_data: Option<SkillTreeData>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SkillTreeData {
+    assets: HashMap<String, HashMap<String, String>>,
+    classes: Vec<SkillTreeClass>,
+    constants: SkillTreeConstants,
+    #[serde(rename = "extraImages")]
+    extra_images: HashMap<String, SkillTreeExtraImage>,
+    groups: HashMap<String, SkillTreeGroup>,
+    #[serde(rename = "imageZoomLevels")]
+    image_zoom_levels: Vec<f32>,
+    #[serde(rename = "jewelSlots")]
+    jewel_slots: Vec<u32>,
+    max_x: f32,
+    max_y: f32,
+    min_x: f32,
+    min_y: f32,
+    nodes: HashMap<String, SkillTreeNode>,
+    #[serde(rename = "skillSprites")]
+    skill_sprites: HashMap<String, Vec<SkillTreeSprite>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SkillTreeClass {
+    name: String,
+    base_str: u32,
+    base_dex: u32,
+    base_int: u32,
+    ascendancies: Vec<SkillTreeAscendancy>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SkillTreeAscendancy {
+    id: String,
+    name: String,
+    #[serde(rename = "flavourText")]
+    flavour_text: Option<String>,
+    #[serde(rename = "flavourTextColour")]
+    flavour_text_colour: Option<String>,
+    #[serde(rename = "flavourTextRect")]
+    flavour_text_rect: Option<Rect>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SkillTreeConstants {
+    classes: HashMap<String, u32>,
+    #[serde(rename = "characterAttributes")]
+    character_attributes: HashMap<String, u32>,
+    #[serde(rename = "PSSCentreInnerRadius")]
+    pss_centre_inner_radius: u32,
+    #[serde(rename = "skillsPerOrbit")]
+    skills_per_orbit: Vec<u32>,
+    #[serde(rename = "orbitRadii")]
+    orbit_radii: Vec<u32>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SkillTreeExtraImage {
+    x: f32,
+    y: f32,
+    image: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SkillTreeGroup {
+    x: f32,
+    y: f32,
+    #[serde(default)]
+    is_proxy: bool,
+    orbits: Vec<u32>,
+    nodes: Vec<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SkillTreeNode {
+    // missing on root node
+    #[serde(default)]
+    skill: u32,
+    // missing on root node
+    #[serde(default)]
+    name: String,
+    icon: Option<String>,
+    #[serde(default)]
+    is_mastery: bool,
+    #[serde(default)]
+    is_notable: bool,
+    #[serde(default)]
+    is_keystone: bool,
+    #[serde(default)]
+    recipe: Vec<String>,
+    #[serde(default)]
+    stats: Vec<String>,
+    #[serde(default)]
+    reminder_text: Vec<String>,
+    #[serde(default)]
+    grantend_dexterity: u32,
+    #[serde(default)]
+    grantend_intelligence: u32,
+    #[serde(default)]
+    grantend_strength: u32,
+    #[serde(default)]
+    is_ascendancy_start: bool,
+    ascendancy_name: Option<String>,
+    orbit: Option<u32>,
+    orbit_index: Option<u32>,
+    #[serde(default)]
+    out: Vec<String>,
+    #[serde(default)]
+    r#in: Vec<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SkillTreeSprite {
+    filename: String,
+    coords: HashMap<String, SkillTreeSpriteCoords>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SkillTreeSpriteCoords {
+    x: i32,
+    y: i32,
+    w: i32,
+    h: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Rect {
+    x: f32,
+    y: f32,
+    width: u32,
+    height: u32,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct League {
     pub id: String,
@@ -94,21 +237,21 @@ pub struct League {
     pub rules: Vec<LeagueRule>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LeagueRule {
     pub id: String,
     pub name: String,
     pub description: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LadderResponse {
     pub total: usize,
     pub cached_since: DateTime<Utc>,
     pub entries: Vec<LadderEntry>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LadderEntry {
     pub rank: i32,
     pub dead: bool,
@@ -117,7 +260,7 @@ pub struct LadderEntry {
     pub account: LadderEntryAccount,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LadderEntryCharacter {
     pub id: String,
     pub name: String,
@@ -126,7 +269,7 @@ pub struct LadderEntryCharacter {
     pub experience: u64,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LadderEntryAccount {
     pub name: String,
     pub realm: String,
@@ -156,6 +299,22 @@ impl PathOfExile {
         );
 
         self.client.get("get_items", url).await
+    }
+
+    pub async fn get_passives(
+        &self,
+        account_name: &str,
+        character: &str,
+        skill_tree_data: bool,
+    ) -> PoeResult<PassivesResponse> {
+        let url = &format!(
+            "/character-window/get-passive-skills?accountName={}&character={}&reqData={}",
+            account_name,
+            character,
+            if skill_tree_data { 1 } else { 0 }
+        );
+
+        self.client.get("get_passives", url).await
     }
 
     pub async fn leagues(&self, limit: usize, offset: usize) -> PoeResult<Vec<League>> {
@@ -194,6 +353,30 @@ mod tests {
         // let's hope he doesn't change or delete the character
         let items = poe.get_items("Steelmage", "SteelDD").await.unwrap();
         assert_eq!(17, items.items.len());
+    }
+
+    #[tokio::test]
+    async fn get_passives() {
+        let poe = PathOfExile::new();
+
+        let passives = poe
+            .get_passives("Steelmage", "SteelDD", false)
+            .await
+            .unwrap();
+        assert_eq!(0, passives.hashes.len()); // actually 0 points allocated
+        assert!(passives.skill_tree_data.is_none());
+    }
+
+    #[tokio::test]
+    async fn get_passives_with_data() {
+        let poe = PathOfExile::new();
+
+        let passives = poe
+            .get_passives("Steelmage", "SteelDD", true)
+            .await
+            .unwrap();
+        assert_eq!(0, passives.hashes.len());
+        assert!(passives.skill_tree_data.is_some());
     }
 
     #[tokio::test]

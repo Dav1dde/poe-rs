@@ -27,7 +27,7 @@ impl Default for PoeClient {
 impl PoeClient {
     pub fn new() -> Self {
         let client = Client::builder()
-            .timeout(Duration::from_secs(10))
+            .timeout(Duration::from_secs(30))
             .build()
             .unwrap();
 
@@ -51,7 +51,15 @@ impl PoeClient {
             .map_err(PoeError::from)?;
 
         if response.status().is_success() {
-            return response.json::<T>().await.map_err(PoeError::from);
+            return response
+                .text()
+                .await
+                .map_err(PoeError::from)
+                .and_then(|raw| {
+                    // strip BOM, which is sometimes included
+                    serde_json::from_str::<T>(raw.trim_start_matches('\u{feff}'))
+                        .map_err(PoeError::from)
+                });
         }
 
         match response.json::<ApiErrorResponse>().await {
