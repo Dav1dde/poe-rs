@@ -179,9 +179,19 @@ pub struct SkillTreeNode {
     #[serde(default)]
     is_keystone: bool,
     #[serde(default)]
+    is_blighted: bool,
+    #[serde(default)]
+    is_jewel_socket: bool,
+    expansion_jewel: Option<ExpansionJewel>,
+    #[serde(default)]
+    is_multiple_choice: bool,
+    #[serde(default)]
     recipe: Vec<String>,
     #[serde(default)]
+    granted_passive_points: u32,
+    #[serde(default)]
     stats: Vec<String>,
+    class_start_index: Option<u32>,
     #[serde(default)]
     reminder_text: Vec<String>,
     #[serde(default)]
@@ -199,6 +209,13 @@ pub struct SkillTreeNode {
     out: Vec<String>,
     #[serde(default)]
     r#in: Vec<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ExpansionJewel {
+    size: u32,
+    index: u32,
+    proxy: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
