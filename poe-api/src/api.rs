@@ -7,7 +7,8 @@ use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ItemsResponse {
-    items: Vec<Item>,
+    pub items: Vec<Item>,
+    pub character: Character,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -67,6 +68,20 @@ pub struct Item {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct Character {
+    pub ascendancy_class: u32,
+    pub class: String,
+    pub class_id: u32,
+    pub experience: u64,
+    #[serde(default)]
+    pub last_active: bool,
+    pub league: String,
+    pub level: u32,
+    pub name: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ItemSocket {
     pub group: u8,
     pub attr: String,
@@ -83,83 +98,83 @@ pub enum SocketColor {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PassivesResponse {
-    hashes: Vec<u32>,
-    items: Vec<Item>,
+    pub hashes: Vec<u32>,
+    pub items: Vec<Item>,
     #[serde(rename = "skillTreeData")]
-    skill_tree_data: Option<SkillTreeData>,
+    pub skill_tree_data: Option<SkillTreeData>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SkillTreeData {
-    assets: HashMap<String, HashMap<String, String>>,
-    classes: Vec<SkillTreeClass>,
-    constants: SkillTreeConstants,
+    pub assets: HashMap<String, HashMap<String, String>>,
+    pub classes: Vec<SkillTreeClass>,
+    pub constants: SkillTreeConstants,
     #[serde(rename = "extraImages")]
-    extra_images: HashMap<String, SkillTreeExtraImage>,
-    groups: HashMap<String, SkillTreeGroup>,
+    pub extra_images: HashMap<String, SkillTreeExtraImage>,
+    pub groups: HashMap<String, SkillTreeGroup>,
     #[serde(rename = "imageZoomLevels")]
-    image_zoom_levels: Vec<f32>,
+    pub image_zoom_levels: Vec<f32>,
     #[serde(rename = "jewelSlots")]
-    jewel_slots: Vec<u32>,
-    max_x: f32,
-    max_y: f32,
-    min_x: f32,
-    min_y: f32,
-    nodes: HashMap<String, SkillTreeNode>,
+    pub jewel_slots: Vec<u32>,
+    pub max_x: f32,
+    pub max_y: f32,
+    pub min_x: f32,
+    pub min_y: f32,
+    pub nodes: HashMap<String, SkillTreeNode>,
     #[serde(rename = "skillSprites")]
-    skill_sprites: HashMap<String, Vec<SkillTreeSprite>>,
+    pub skill_sprites: HashMap<String, Vec<SkillTreeSprite>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SkillTreeClass {
-    name: String,
-    base_str: u32,
-    base_dex: u32,
-    base_int: u32,
-    ascendancies: Vec<SkillTreeAscendancy>,
+    pub name: String,
+    pub base_str: u32,
+    pub base_dex: u32,
+    pub base_int: u32,
+    pub ascendancies: Vec<SkillTreeAscendancy>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SkillTreeAscendancy {
-    id: String,
-    name: String,
+    pub id: String,
+    pub name: String,
     #[serde(rename = "flavourText")]
-    flavour_text: Option<String>,
+    pub flavour_text: Option<String>,
     #[serde(rename = "flavourTextColour")]
-    flavour_text_colour: Option<String>,
+    pub flavour_text_colour: Option<String>,
     #[serde(rename = "flavourTextRect")]
-    flavour_text_rect: Option<Rect>,
+    pub flavour_text_rect: Option<Rect>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SkillTreeConstants {
-    classes: HashMap<String, u32>,
+    pub classes: HashMap<String, u32>,
     #[serde(rename = "characterAttributes")]
-    character_attributes: HashMap<String, u32>,
+    pub character_attributes: HashMap<String, u32>,
     #[serde(rename = "PSSCentreInnerRadius")]
-    pss_centre_inner_radius: u32,
+    pub pss_centre_inner_radius: u32,
     #[serde(rename = "skillsPerOrbit")]
-    skills_per_orbit: Vec<u32>,
+    pub skills_per_orbit: Vec<u32>,
     #[serde(rename = "orbitRadii")]
-    orbit_radii: Vec<u32>,
+    pub orbit_radii: Vec<u32>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SkillTreeExtraImage {
-    x: f32,
-    y: f32,
-    image: String,
+    pub x: f32,
+    pub y: f32,
+    pub image: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SkillTreeGroup {
-    x: f32,
-    y: f32,
+    pub x: f32,
+    pub y: f32,
     #[serde(default)]
-    is_proxy: bool,
-    orbits: Vec<u32>,
-    nodes: Vec<String>,
+    pub is_proxy: bool,
+    pub orbits: Vec<u32>,
+    pub nodes: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -167,77 +182,77 @@ pub struct SkillTreeGroup {
 pub struct SkillTreeNode {
     // missing on root node
     #[serde(default)]
-    skill: u32,
+    pub skill: u32,
     // missing on root node
     #[serde(default)]
-    name: String,
-    icon: Option<String>,
+    pub name: String,
+    pub icon: Option<String>,
     #[serde(default)]
-    is_mastery: bool,
+    pub is_mastery: bool,
     #[serde(default)]
-    is_notable: bool,
+    pub is_notable: bool,
     #[serde(default)]
-    is_keystone: bool,
+    pub is_keystone: bool,
     #[serde(default)]
-    is_blighted: bool,
+    pub is_blighted: bool,
     #[serde(default)]
-    is_jewel_socket: bool,
-    expansion_jewel: Option<ExpansionJewel>,
+    pub is_jewel_socket: bool,
+    pub expansion_jewel: Option<ExpansionJewel>,
     #[serde(default)]
-    is_multiple_choice: bool,
+    pub is_multiple_choice: bool,
     #[serde(default)]
-    recipe: Vec<String>,
+    pub recipe: Vec<String>,
     #[serde(default)]
-    granted_passive_points: u32,
+    pub granted_passive_points: u32,
     #[serde(default)]
-    stats: Vec<String>,
-    class_start_index: Option<u32>,
+    pub stats: Vec<String>,
+    pub class_start_index: Option<u32>,
     #[serde(default)]
-    reminder_text: Vec<String>,
+    pub reminder_text: Vec<String>,
     #[serde(default)]
-    grantend_dexterity: u32,
+    pub grantend_dexterity: u32,
     #[serde(default)]
-    grantend_intelligence: u32,
+    pub grantend_intelligence: u32,
     #[serde(default)]
-    grantend_strength: u32,
+    pub grantend_strength: u32,
     #[serde(default)]
-    is_ascendancy_start: bool,
-    ascendancy_name: Option<String>,
-    orbit: Option<u32>,
-    orbit_index: Option<u32>,
+    pub is_ascendancy_start: bool,
+    pub ascendancy_name: Option<String>,
+    pub orbit: Option<u32>,
+    pub orbit_index: Option<u32>,
     #[serde(default)]
-    out: Vec<String>,
+    pub out: Vec<String>,
     #[serde(default)]
-    r#in: Vec<String>,
+    pub r#in: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ExpansionJewel {
-    size: u32,
-    index: u32,
-    proxy: String,
+    pub size: u32,
+    pub index: u32,
+    pub proxy: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SkillTreeSprite {
-    filename: String,
-    coords: HashMap<String, SkillTreeSpriteCoords>,
+    pub filename: String,
+    pub coords: HashMap<String, SkillTreeSpriteCoords>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SkillTreeSpriteCoords {
-    x: i32,
-    y: i32,
-    w: i32,
-    h: i32,
+    pub x: i32,
+    pub y: i32,
+    pub w: i32,
+    pub h: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Rect {
-    x: f32,
-    y: f32,
-    width: u32,
-    height: u32,
+    pub x: f32,
+    pub y: f32,
+    pub width: u32,
+    pub height: u32,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
