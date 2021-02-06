@@ -108,7 +108,7 @@ mod tests {
     #[tokio::test]
     async fn test() {
         let mut ps = PagedStream::new(5, 5, Some(100), |pr| async move {
-            tokio::time::delay_for(tokio::time::Duration::from_millis(1)).await;
+            tokio::time::sleep(tokio::time::Duration::from_millis(1)).await;
             Ok::<_, ()>(pr.offset..pr.offset + pr.limit)
         });
 
@@ -123,7 +123,7 @@ mod tests {
     #[tokio::test]
     async fn test_error() {
         let mut ps = PagedStream::new(5, 1, Some(10), |pr| async move {
-            tokio::time::delay_for(tokio::time::Duration::from_millis(1)).await;
+            tokio::time::sleep(tokio::time::Duration::from_millis(1)).await;
             if pr.offset > 3 {
                 Err("error")
             } else {

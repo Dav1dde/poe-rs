@@ -3,7 +3,7 @@ use futures::stream::TryStreamExt;
 use poe_api::page::PagedStream;
 use poe_api::{PathOfExile, PoeError};
 
-#[tokio::main(core_threads = 4)]
+#[tokio::main(worker_threads = 4)]
 async fn main() {
     if let Err(err) = try_main().await {
         eprintln!("{}", err);
@@ -77,7 +77,7 @@ async fn try_main() -> Result<(), Box<dyn std::error::Error>> {
         );
 
         if let Some(delay) = print_delay {
-            tokio::time::delay_for(tokio::time::Duration::from_millis(delay)).await;
+            tokio::time::sleep(tokio::time::Duration::from_millis(delay)).await;
         }
     }
 

@@ -6,7 +6,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::sync::{RwLock, Semaphore, SemaphorePermit};
-use tokio::time::delay_until;
+use tokio::time::sleep_until;
 
 use crate::response::{ApiErrorResponse, PoeError, PoeResult};
 
@@ -113,7 +113,7 @@ impl History {
     }
 
     async fn wait(&self) -> SemaphorePermit<'_> {
-        let ticket = self.tickets.acquire().await;
+        let ticket = self.tickets.acquire().await.unwrap();
 
         loop {
             let mut wait_time = None;
@@ -138,7 +138,7 @@ impl History {
             }
 
             if let Some(time) = wait_time {
-                delay_until(time).await;
+                sleep_until(time).await;
             }
         }
     }
