@@ -108,8 +108,12 @@ impl History {
     //     }
     // }
 
-    async fn done(&self) {
+    fn done(&self) {
         self.calls.lock().unwrap().push_back(Instant::now());
+    }
+
+    fn failed(&self) {
+        self.active.fetch_sub(1, Ordering::Relaxed);
     }
 
     async fn wait(&self) -> SemaphorePermit<'_> {
@@ -118,17 +122,17 @@ impl History {
         loop {
             let mut wait_time = None;
 
-            if self.active.fetch_add(1, Ordering::Acquire) < self.limit {
+            if self.active.fetch_add(1, Ordering::SeqCst) < self.limit {
                 return ticket;
             } else {
-                self.active.fetch_sub(1, Ordering::Release);
+                self.active.fetch_sub(1, Ordering::SeqCst);
 
                 let mut calls = self.calls.lock().unwrap();
                 if let Some(time) = calls.front() {
                     let x = Instant::now() - self.duration;
                     if x > *time {
                         calls.pop_front();
-                        self.active.fetch_sub(1, Ordering::Release);
+                        self.active.fetch_sub(1, Ordering::SeqCst);
                     } else {
                         wait_time = Some(tokio::time::Instant::from_std(*time + self.duration));
                     }
@@ -173,10 +177,15 @@ impl RateLimiter {
         let history = limits.get(call_id).unwrap();
         let _ticket = history.wait().await;
 
-        let response = api_call.await?;
-
-        history.done().await;
-
-        Ok(response)
+        match api_call.await {
+            Ok(result) => {
+                history.done();
+                Ok(result)
+            }
+            Err(err) => {
+                history.failed();
+                Err(err)
+            }
+        }
     }
 }
