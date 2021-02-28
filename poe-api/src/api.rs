@@ -1,11 +1,11 @@
 use crate::client::PoeClient;
 use crate::response::PoeResult;
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct ItemsResponse {
     pub items: Vec<Item>,
     pub character: Character,
@@ -66,7 +66,7 @@ pub struct Item {
     pub color: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Character {
     pub ascendancy_class: u32,
@@ -96,7 +96,7 @@ pub enum SocketColor {
     W,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct PassivesResponse {
     pub hashes: Vec<u32>,
     pub items: Vec<Item>,
@@ -281,6 +281,16 @@ pub struct LadderResponse {
     pub total: usize,
     pub cached_since: DateTime<Utc>,
     pub entries: Vec<LadderEntry>,
+}
+
+impl Default for LadderResponse {
+    fn default() -> Self {
+        Self {
+            total: 0,
+            cached_since: DateTime::from_utc(NaiveDateTime::from_timestamp(0, 0), Utc),
+            entries: Vec::default(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
