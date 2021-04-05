@@ -8,6 +8,7 @@ pub enum PoeError {
     NotFound(ApiError),
     #[error("unknown API error")]
     UnknownApiError(ApiError),
+    #[cfg(feature = "client")]
     #[error("unexpected transport or decoding error occured")]
     Reqwest(#[from] reqwest::Error),
     #[error("deserialization error")]
