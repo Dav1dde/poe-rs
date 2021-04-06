@@ -1,5 +1,6 @@
 use reqwest::{Client, Url};
 use serde::de::DeserializeOwned;
+use serde::ser::Serialize;
 use std::collections::{HashMap, LinkedList};
 use std::future::Future;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -44,9 +45,32 @@ impl PoeClient {
             .parse(url)
             .unwrap();
 
+        self.execute(call_id, self.client.get(url)).await
+    }
+
+    pub async fn post<T: DeserializeOwned, Body: Serialize + ?Sized>(
+        &self,
+        call_id: &str,
+        url: &str,
+        body: &Body,
+    ) -> PoeResult<T> {
+        let url = Url::options()
+            .base_url(Some(&self.base_url))
+            .parse(url)
+            .unwrap();
+
+        self.execute(call_id, self.client.post(url).json(body))
+            .await
+    }
+
+    async fn execute<T: DeserializeOwned>(
+        &self,
+        call_id: &str,
+        request: reqwest::RequestBuilder,
+    ) -> PoeResult<T> {
         let response = self
             .rate_limiter
-            .rate_limited(call_id, async { self.client.get(url).send().await })
+            .rate_limited(call_id, async { request.send().await })
             .await
             .map_err(PoeError::from)?;
 

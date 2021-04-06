@@ -3,6 +3,9 @@ use poe_api::{PathOfExile, PoeError};
 
 #[derive(Clap)]
 struct Opts {
+    #[clap(short, long, parse(from_occurrences))]
+    verbose: u32,
+
     #[clap(subcommand)]
     subcmd: SubCommand,
 }
@@ -57,6 +60,14 @@ async fn main() {
 
 async fn try_main() -> Result<(), PoeError> {
     let opts: Opts = Opts::parse();
+
+    tracing_subscriber::fmt()
+        .with_max_level(match opts.verbose {
+            0 => tracing::Level::INFO,
+            1 => tracing::Level::DEBUG,
+            _ => tracing::Level::TRACE,
+        })
+        .init();
 
     let poe = PathOfExile::new();
 

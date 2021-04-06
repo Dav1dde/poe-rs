@@ -2,6 +2,8 @@ use crate::api::*;
 use crate::client::PoeClient;
 use crate::response::PoeResult;
 
+const WEB_DOMAIN: &str = "https://www.pathofexile.com";
+
 pub struct PathOfExile {
     client: PoeClient,
 }
@@ -21,8 +23,8 @@ impl PathOfExile {
 
     pub async fn get_items(&self, account_name: &str, character: &str) -> PoeResult<ItemsResponse> {
         let url = &format!(
-            "/character-window/get-items?accountName={}&character={}",
-            account_name, character
+            "{}/character-window/get-items?accountName={}&character={}",
+            WEB_DOMAIN, account_name, character
         );
 
         self.client.get("get_items", url).await
@@ -35,7 +37,8 @@ impl PathOfExile {
         skill_tree_data: bool,
     ) -> PoeResult<PassivesResponse> {
         let url = &format!(
-            "/character-window/get-passive-skills?accountName={}&character={}&reqData={}",
+            "{}/character-window/get-passive-skills?accountName={}&character={}&reqData={}",
+            WEB_DOMAIN,
             account_name,
             character,
             if skill_tree_data { 1 } else { 0 }
