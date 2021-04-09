@@ -16,7 +16,7 @@ const API_URL: &str = "https://api.pathofexile.com";
 pub struct PoeClient {
     client: Client,
     base_url: Url,
-    rate_limiter: Arc<RateLimiter>,
+    rate_limiter: RateLimiter,
 }
 
 impl Default for PoeClient {
@@ -35,7 +35,7 @@ impl PoeClient {
         PoeClient {
             client,
             base_url: Url::parse(API_URL).unwrap(),
-            rate_limiter: Arc::new(RateLimiter::new()),
+            rate_limiter: RateLimiter::new(),
         }
     }
 

@@ -1,11 +1,14 @@
+use std::sync::Arc;
+
 use crate::api::*;
 use crate::client::PoeClient;
 use crate::response::PoeResult;
 
 const WEB_DOMAIN: &str = "https://www.pathofexile.com";
 
+#[derive(Clone)]
 pub struct PathOfExile {
-    client: PoeClient,
+    client: Arc<PoeClient>,
 }
 
 impl Default for PathOfExile {
@@ -14,10 +17,18 @@ impl Default for PathOfExile {
     }
 }
 
+impl From<PoeClient> for PathOfExile {
+    fn from(client: PoeClient) -> Self {
+        Self {
+            client: Arc::new(client),
+        }
+    }
+}
+
 impl PathOfExile {
     pub fn new() -> PathOfExile {
         PathOfExile {
-            client: PoeClient::new(),
+            client: Arc::new(PoeClient::new()),
         }
     }
 
@@ -74,7 +85,6 @@ impl PathOfExile {
 #[cfg(test)]
 mod tests {
     use super::PathOfExile;
-    use std::sync::Arc;
 
     #[tokio::test]
     async fn get_items() {
@@ -134,7 +144,7 @@ mod tests {
 
     #[tokio::test]
     async fn ladder() {
-        let poe = Arc::new(PathOfExile::new());
+        let poe = PathOfExile::new();
 
         let ladder = poe.ladder("Standard", 1, 0).await.unwrap();
 
@@ -146,13 +156,13 @@ mod tests {
     #[ignore]
     #[tokio::test]
     async fn ladder_rate_limit() {
-        let poe = Arc::new(PathOfExile::new());
+        let poe = PathOfExile::new();
 
         let n = 6;
 
         let mut threads = Vec::with_capacity(n);
         for _ in 0..n {
-            let poe = Arc::clone(&poe);
+            let poe = poe.clone();
             threads.push(tokio::spawn(async move {
                 let ladder = poe.ladder("Standard", 1, 0).await.unwrap();
                 assert_eq!(15000, ladder.total);
