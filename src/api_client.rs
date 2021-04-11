@@ -6,6 +6,59 @@ use crate::response::PoeResult;
 
 const WEB_DOMAIN: &str = "https://www.pathofexile.com";
 
+/// A builder to construct a configured [`PathOfExile`] client.
+pub struct PathOfExileBuilder {
+    application: (String, String),
+    contact: Option<String>,
+}
+
+impl PathOfExileBuilder {
+    fn new() -> Self {
+        Self {
+            application: ("poe-rs".to_string(), env!("CARGO_PKG_VERSION").to_string()),
+            contact: None,
+        }
+    }
+
+    /// Sets the application name and version. Defaults to the `poe-rs/{crate version}`.
+    ///
+    /// This information will be included in the User-Agent of the request.
+    pub fn application(mut self, name: impl Into<String>, version: impl Into<String>) -> Self {
+        self.application = (name.into(), version.into());
+        self
+    }
+
+    /// Sets contact information for this client.
+    ///
+    /// This information will be included in the User-Agent of the request.
+    pub fn contact(mut self, contact: impl Into<String>) -> Self {
+        self.contact = Some(contact.into());
+        self
+    }
+
+    /// Builds a [`PathOfExile`] which can be used to make API requests.
+    pub fn build(self) -> PathOfExile {
+        let mut client = PoeClient::new();
+
+        let mut user_agent = format!("{}/{}", self.application.0, self.application.1);
+        if let Some(contact) = self.contact.as_ref() {
+            user_agent.push_str(" (contact: ");
+            user_agent.push_str(contact);
+            user_agent.push(')');
+        }
+        client.user_agent(user_agent);
+
+        client.into()
+    }
+}
+
+/// A client to make Path of Exile API requests with.
+///
+/// You should use [`PathOfExileBuilder`] through `PathOfExile::builder` to create a `PathOfExile`
+/// client.
+///
+/// You do **not** have to wrap the `PathOfExile` client in an [`std::rc::Rc`]
+/// or [`Arc`] to **reuse** it, because it already uses an [`Arc`] internally.
 #[derive(Clone)]
 pub struct PathOfExile {
     client: Arc<PoeClient>,
@@ -26,10 +79,12 @@ impl From<PoeClient> for PathOfExile {
 }
 
 impl PathOfExile {
-    pub fn new() -> PathOfExile {
-        PathOfExile {
-            client: Arc::new(PoeClient::new()),
-        }
+    pub fn new() -> Self {
+        Self::builder().build()
+    }
+
+    pub fn builder() -> PathOfExileBuilder {
+        PathOfExileBuilder::new()
     }
 
     pub async fn get_items(&self, account_name: &str, character: &str) -> PoeResult<ItemsResponse> {

@@ -17,6 +17,7 @@ pub struct PoeClient {
     client: Client,
     base_url: Url,
     rate_limiter: RateLimiter,
+    user_agent: String,
 }
 
 impl Default for PoeClient {
@@ -36,7 +37,12 @@ impl PoeClient {
             client,
             base_url: Url::parse(API_URL).unwrap(),
             rate_limiter: RateLimiter::new(),
+            user_agent: format!("poe-rs/{}", env!("CARGO_PKG_VERSION")),
         }
+    }
+
+    pub fn user_agent(&mut self, user_agent: impl Into<String>) {
+        self.user_agent = user_agent.into();
     }
 
     pub async fn get<T: DeserializeOwned>(&self, call_id: &str, url: &str) -> PoeResult<T> {
@@ -68,6 +74,8 @@ impl PoeClient {
         call_id: &str,
         request: reqwest::RequestBuilder,
     ) -> PoeResult<T> {
+        let request = request.header("User-Agent", &self.user_agent);
+
         let response = self
             .rate_limiter
             .rate_limited(call_id, async { request.send().await })

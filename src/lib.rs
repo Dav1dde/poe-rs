@@ -2,7 +2,7 @@ pub mod api;
 #[cfg(feature = "client")]
 mod api_client;
 #[cfg(feature = "client")]
-pub mod client;
+mod client;
 pub mod page;
 pub mod response;
 
