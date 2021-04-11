@@ -2,6 +2,8 @@ use chrono::{DateTime, NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+use crate::utils::{empty_array_is_map, string_or_u32};
+
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct ItemsResponse {
     pub items: Vec<Item>,
@@ -97,8 +99,28 @@ pub enum SocketColor {
 pub struct PassivesResponse {
     pub hashes: Vec<u32>,
     pub items: Vec<Item>,
+    #[serde(default)]
+    pub hashes_ex: Vec<u32>,
+    #[serde(default, deserialize_with = "empty_array_is_map")]
+    pub jewel_data: HashMap<String, JewelData>,
     #[serde(rename = "skillTreeData")]
     pub skill_tree_data: Option<SkillTreeData>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct JewelData {
+    r#type: String,
+    radius: Option<u32>,
+    radius_min: Option<u32>,
+    radius_visual: Option<String>,
+    subgraph: Option<JewelDataSubgraph>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct JewelDataSubgraph {
+    groups: HashMap<String, SkillTreeGroup>,
+    nodes: HashMap<String, SkillTreeNode>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -170,6 +192,7 @@ pub struct SkillTreeGroup {
     pub y: f32,
     #[serde(default)]
     pub is_proxy: bool,
+    pub proxy: Option<String>,
     pub orbits: Vec<u32>,
     pub nodes: Vec<String>,
 }
@@ -178,7 +201,7 @@ pub struct SkillTreeGroup {
 #[serde(rename_all = "camelCase")]
 pub struct SkillTreeNode {
     // missing on root node
-    #[serde(default)]
+    #[serde(default, deserialize_with = "string_or_u32")]
     pub skill: u32,
     // missing on root node
     #[serde(default)]

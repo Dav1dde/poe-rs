@@ -5,6 +5,7 @@ mod api_client;
 mod client;
 pub mod page;
 pub mod response;
+mod utils;
 
 pub use crate::api::*;
 #[cfg(feature = "client")]
