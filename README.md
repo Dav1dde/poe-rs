@@ -33,11 +33,11 @@ while let Some(entry) = stream.next().await {
 }
 ```
 
-## poe-cli
+## Example: poe-cli
 
 Tool for accessing the PoE API via command line.
 
-    $ ./poe-cli items dav1d_ ChristineWolcen | jq
+    $ cargo run --example poe-cli -- items dav1d_ ChristineWolcen | jq
     {
       "items": [
         {
@@ -56,7 +56,7 @@ Tool for accessing the PoE API via command line.
 
 Simple cli-tool for (private) league ladder data.
 
-    $ ./poe-ladder "ETHICAL LEAGUE (PL12057)"
+    $ cargo run --example poe-ladder -- "ETHICAL LEAGUE (PL12057)"
     |  S |   R | LVL | Character Name            | Account Name              | Experience |
     =======================================================================================
     |    |   1 |  94 | ViperLontra               | Unt12                     | 2.668 B    |

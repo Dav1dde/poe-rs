@@ -1,7 +1,16 @@
-use clap::{App, Arg};
+use clap::Clap;
 use futures::stream::TryStreamExt;
 use poe_api::page::PagedStream;
 use poe_api::{PathOfExile, PoeError};
+
+#[derive(Clap)]
+struct Args {
+    /// Path of Exile league name
+    league: String,
+    /// delay in ms between each row
+    #[clap(short = 'd')]
+    print_delay: Option<u64>,
+}
 
 #[tokio::main(worker_threads = 4)]
 async fn main() {
@@ -12,26 +21,10 @@ async fn main() {
 }
 
 async fn try_main() -> Result<(), Box<dyn std::error::Error>> {
-    let app = App::new("PoE Ladder")
-        .arg(
-            Arg::with_name("LEAGUE")
-                .help("the PoE league")
-                .required(true)
-                .index(1),
-        )
-        .arg(
-            Arg::with_name("print-delay")
-                .long("print-delay")
-                .short("d")
-                .help("delay in ms between printing rows")
-                .takes_value(true),
-        )
-        .get_matches();
+    let args = Args::parse();
 
-    let league_name = app.value_of("LEAGUE").unwrap();
-    let print_delay = app
-        .value_of("print-delay")
-        .map(|delay| delay.parse::<u64>().expect("invalid delay"));
+    let league_name = &args.league;
+    let print_delay = args.print_delay;
 
     let poe = PathOfExile::new();
 
