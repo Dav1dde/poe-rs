@@ -4,6 +4,14 @@ use std::collections::HashMap;
 use std::fmt;
 use std::marker::PhantomData;
 
+pub(crate) fn is_false(b: &bool) -> bool {
+    !b
+}
+
+pub(crate) fn is_zero(num: &u32) -> bool {
+    *num == 0
+}
+
 pub(crate) fn empty_array_is_map<'de, D, K, V>(deserializer: D) -> Result<HashMap<K, V>, D::Error>
 where
     D: Deserializer<'de>,

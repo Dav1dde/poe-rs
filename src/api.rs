@@ -2,12 +2,12 @@ use chrono::{DateTime, NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::utils::{empty_array_is_map, string_or_u32};
+use crate::utils::{empty_array_is_map, is_false, is_zero, string_or_u32};
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct ItemsResponse {
     pub items: Vec<Item>,
-    pub character: Character,
+    pub character: ItemsCharacter,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -16,63 +16,176 @@ pub struct Item {
     pub verified: bool,
     pub w: u8,
     pub h: u8,
-    pub ilvl: u8,
     pub icon: String,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub support: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stack_size: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub max_stack_size: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stack_size_text: Option<String>,
+    #[serde(default)]
     pub league: String,
-    pub id: String,
-    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
+    pub influences: HashMap<String, bool>,
+    #[serde(default, skip_serializing_if = "is_false")]
     pub elder: bool,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "is_false")]
     pub shaper: bool,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub abyss_jewel: bool,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub delve: bool,
+    #[serde(default, skip_serializing_if = "is_false")]
     pub fractured: bool,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub synthesised: bool,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub sockets: Vec<ItemSocket>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub socketed_items: Vec<Item>,
     pub name: String,
     pub type_line: String,
-    #[serde(default)]
+    pub base_type: String,
     pub identified: bool,
-    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub item_level: Option<i32>,
+    pub ilvl: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub note: Option<String>,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub locked_to_character: bool,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub locked_to_account: bool,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub duplicated: bool,
+    #[serde(default, skip_serializing_if = "is_false")]
     pub corrupted: bool,
-    // properties
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub cis_reward: bool,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub sea_race_reward: bool,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub th_race_reward: bool,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub properties: Vec<ItemProperty>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub talisman_tier: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sec_descr_text: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub utility_mods: Vec<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub implicit_mods: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub explicit_mods: Vec<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub crafted_mods: Vec<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub enchant_mods: Vec<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub fractured_mods: Vec<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub cosmetic_mods: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub veiled_mods: Vec<String>,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub veiled: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub descr_text: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub flavour_text: Vec<String>,
-    #[serde(default)]
-    pub descr_text: String,
-    #[serde(default)]
-    pub sec_descr_text: String,
-    pub frame_type: i32,
-    // category
-    pub x: i32,
-    pub y: i32,
-    pub inventory_id: String,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub flavour_text_parsed: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prophecy_text: Option<String>,
+    #[serde(default, skip_serializing_if = "is_false")]
     pub is_relic: bool,
-    // socketetedItems
-    #[serde(default)]
-    pub socket: i32,
-    #[serde(default)]
-    pub color: String,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub replica: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub incubated_item: Option<IncubatedItem>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub frame_type: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub art_filename: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hybrid: Option<ItemHybrid>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub x: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub y: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inventory_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub socket: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub colour: Option<String>,
+
+    // missing from docs for now
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub requirements: Vec<ItemProperty>,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Character {
+pub struct ItemProperty {
+    name: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    values: Vec<(String, u32)>,
+    display_mode: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    progress: Option<f32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    r#type: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    suffix: Option<String>,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct IncubatedItem {
+    name: String,
+    level: u32,
+    progress: u32, // maybe this is f32?
+    total: u32,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ItemHybrid {
+    #[serde(default, skip_serializing_if = "is_false")]
+    is_vaal_gem: bool,
+    base_type_name: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    properties: Vec<ItemProperty>,
+    explicit_mods: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    sec_descr_text: Option<String>,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ItemExtended {
+    category: String,
+    subcategories: Vec<String>,
+    #[serde(default, skip_serializing_if = "is_zero")]
+    prefixes: u32,
+    #[serde(default, skip_serializing_if = "is_zero")]
+    suffixes: u32,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ItemsCharacter {
     pub ascendancy_class: u32,
     pub class: String,
     pub class_id: u32,
     pub experience: u64,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "is_false")]
     pub last_active: bool,
     pub league: String,
     pub level: u32,
@@ -83,16 +196,21 @@ pub struct Character {
 #[serde(rename_all = "camelCase")]
 pub struct ItemSocket {
     pub group: u8,
-    pub attr: String,
-    pub s_colour: SocketColor,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub attr: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub s_colour: Option<SocketColor>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum SocketColor {
-    B,
-    G,
     R,
+    G,
+    B,
     W,
+    A,
+    #[serde(rename = "UPPER_CASE")]
+    Dv,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
@@ -104,6 +222,7 @@ pub struct PassivesResponse {
     #[serde(default, deserialize_with = "empty_array_is_map")]
     pub jewel_data: HashMap<String, JewelData>,
     #[serde(rename = "skillTreeData")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub skill_tree_data: Option<SkillTreeData>,
 }
 
@@ -111,9 +230,13 @@ pub struct PassivesResponse {
 #[serde(rename_all = "camelCase")]
 pub struct JewelData {
     r#type: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     radius: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     radius_min: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     radius_visual: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     subgraph: Option<JewelDataSubgraph>,
 }
 
@@ -157,11 +280,11 @@ pub struct SkillTreeClass {
 pub struct SkillTreeAscendancy {
     pub id: String,
     pub name: String,
-    #[serde(rename = "flavourText")]
+    #[serde(rename = "flavourText", skip_serializing_if = "Option::is_none")]
     pub flavour_text: Option<String>,
-    #[serde(rename = "flavourTextColour")]
+    #[serde(rename = "flavourTextColour", skip_serializing_if = "Option::is_none")]
     pub flavour_text_colour: Option<String>,
-    #[serde(rename = "flavourTextRect")]
+    #[serde(rename = "flavourTextRect", skip_serializing_if = "Option::is_none")]
     pub flavour_text_rect: Option<Rect>,
 }
 
@@ -190,8 +313,9 @@ pub struct SkillTreeExtraImage {
 pub struct SkillTreeGroup {
     pub x: f32,
     pub y: f32,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "is_false")]
     pub is_proxy: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub proxy: Option<String>,
     pub orbits: Vec<u32>,
     pub nodes: Vec<String>,
@@ -206,43 +330,49 @@ pub struct SkillTreeNode {
     // missing on root node
     #[serde(default)]
     pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub icon: Option<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "is_false")]
     pub is_mastery: bool,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "is_false")]
     pub is_notable: bool,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "is_false")]
     pub is_keystone: bool,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "is_false")]
     pub is_blighted: bool,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "is_false")]
     pub is_jewel_socket: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub expansion_jewel: Option<ExpansionJewel>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "is_false")]
     pub is_multiple_choice: bool,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub recipe: Vec<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "is_zero")]
     pub granted_passive_points: u32,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub stats: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub class_start_index: Option<u32>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub reminder_text: Vec<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "is_zero")]
     pub grantend_dexterity: u32,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "is_zero")]
     pub grantend_intelligence: u32,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "is_zero")]
     pub grantend_strength: u32,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "is_false")]
     pub is_ascendancy_start: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ascendancy_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub orbit: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub orbit_index: Option<u32>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub out: Vec<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub r#in: Vec<String>,
 }
 
@@ -284,6 +414,7 @@ pub struct League {
     pub register_at: DateTime<Utc>,
     pub url: String,
     pub start_at: DateTime<Utc>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub end_at: Option<DateTime<Utc>>,
     pub delve_event: bool,
     pub rules: Vec<LeagueRule>,
