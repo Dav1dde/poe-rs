@@ -52,7 +52,7 @@ Tool for accessing the PoE API via command line.
     }
 
 
-## poe-ladder
+## Example: poe-ladder
 
 Simple cli-tool for (private) league ladder data.
 
