@@ -4,13 +4,13 @@ use std::collections::HashMap;
 
 use crate::utils::{empty_array_is_map, is_false, is_zero, string_or_u32};
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct ItemsResponse {
     pub items: Vec<Item>,
-    pub character: ItemsCharacter,
+    pub character: CharacterInfo,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Item {
     pub verified: bool,
@@ -130,7 +130,7 @@ pub struct Item {
     pub requirements: Vec<ItemProperty>,
 }
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ItemProperty {
     name: String,
@@ -145,7 +145,7 @@ pub struct ItemProperty {
     suffix: Option<String>,
 }
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IncubatedItem {
     name: String,
@@ -154,7 +154,7 @@ pub struct IncubatedItem {
     total: u32,
 }
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ItemHybrid {
     #[serde(default, skip_serializing_if = "is_false")]
@@ -167,7 +167,7 @@ pub struct ItemHybrid {
     sec_descr_text: Option<String>,
 }
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ItemExtended {
     category: String,
@@ -178,9 +178,9 @@ pub struct ItemExtended {
     suffixes: u32,
 }
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ItemsCharacter {
+pub struct CharacterInfo {
     pub ascendancy_class: u32,
     pub class: String,
     pub class_id: u32,
@@ -192,7 +192,7 @@ pub struct ItemsCharacter {
     pub name: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ItemSocket {
     pub group: u8,
@@ -202,7 +202,7 @@ pub struct ItemSocket {
     pub s_colour: Option<SocketColor>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum SocketColor {
     R,
     G,
@@ -213,7 +213,7 @@ pub enum SocketColor {
     Dv,
 }
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct PassivesResponse {
     pub hashes: Vec<u32>,
     pub items: Vec<Item>,
@@ -226,7 +226,7 @@ pub struct PassivesResponse {
     pub skill_tree_data: Option<SkillTreeData>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JewelData {
     r#type: String,
@@ -240,13 +240,13 @@ pub struct JewelData {
     subgraph: Option<JewelDataSubgraph>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct JewelDataSubgraph {
     groups: HashMap<String, SkillTreeGroup>,
     nodes: HashMap<String, SkillTreeNode>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SkillTreeData {
     pub assets: HashMap<String, HashMap<String, String>>,
     pub classes: Vec<SkillTreeClass>,
@@ -267,7 +267,7 @@ pub struct SkillTreeData {
     pub skill_sprites: HashMap<String, Vec<SkillTreeSprite>>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SkillTreeClass {
     pub name: String,
     pub base_str: u32,
@@ -276,7 +276,7 @@ pub struct SkillTreeClass {
     pub ascendancies: Vec<SkillTreeAscendancy>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SkillTreeAscendancy {
     pub id: String,
     pub name: String,
@@ -288,7 +288,7 @@ pub struct SkillTreeAscendancy {
     pub flavour_text_rect: Option<Rect>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SkillTreeConstants {
     pub classes: HashMap<String, u32>,
     #[serde(rename = "characterAttributes")]
@@ -301,14 +301,14 @@ pub struct SkillTreeConstants {
     pub orbit_radii: Vec<u32>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SkillTreeExtraImage {
     pub x: f32,
     pub y: f32,
     pub image: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SkillTreeGroup {
     pub x: f32,
@@ -321,7 +321,7 @@ pub struct SkillTreeGroup {
     pub nodes: Vec<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SkillTreeNode {
     // missing on root node
@@ -376,20 +376,20 @@ pub struct SkillTreeNode {
     pub r#in: Vec<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ExpansionJewel {
     pub size: u32,
     pub index: u32,
     pub proxy: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SkillTreeSprite {
     pub filename: String,
     pub coords: HashMap<String, SkillTreeSpriteCoords>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SkillTreeSpriteCoords {
     pub x: i32,
     pub y: i32,
@@ -397,7 +397,7 @@ pub struct SkillTreeSpriteCoords {
     pub h: i32,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Rect {
     pub x: f32,
     pub y: f32,
@@ -405,7 +405,7 @@ pub struct Rect {
     pub height: u32,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct League {
     pub id: String,
@@ -420,14 +420,14 @@ pub struct League {
     pub rules: Vec<LeagueRule>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LeagueRule {
     pub id: String,
     pub name: String,
     pub description: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LadderResponse {
     pub total: usize,
     pub cached_since: DateTime<Utc>,
@@ -444,16 +444,17 @@ impl Default for LadderResponse {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LadderEntry {
     pub rank: i32,
     pub dead: bool,
+    #[serde(default, skip_serializing_if = "is_false")]
     pub online: bool,
     pub character: LadderEntryCharacter,
     pub account: LadderEntryAccount,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LadderEntryCharacter {
     pub id: String,
     pub name: String,
@@ -462,7 +463,7 @@ pub struct LadderEntryCharacter {
     pub experience: u64,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LadderEntryAccount {
     pub name: String,
     pub realm: String,

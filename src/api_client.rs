@@ -87,10 +87,29 @@ impl PathOfExile {
         PathOfExileBuilder::new()
     }
 
-    pub async fn get_items(&self, account_name: &str, character: &str) -> PoeResult<ItemsResponse> {
+    pub async fn get_characters(
+        &self,
+        account_name: impl AsRef<str>,
+    ) -> PoeResult<Vec<CharacterInfo>> {
+        let url = &format!(
+            "{}/character-window/get-characters?accountName={}",
+            WEB_DOMAIN,
+            account_name.as_ref()
+        );
+
+        self.client.get("get_characters", url).await
+    }
+
+    pub async fn get_items(
+        &self,
+        account_name: impl AsRef<str>,
+        character: impl AsRef<str>,
+    ) -> PoeResult<ItemsResponse> {
         let url = &format!(
             "{}/character-window/get-items?accountName={}&character={}",
-            WEB_DOMAIN, account_name, character
+            WEB_DOMAIN,
+            account_name.as_ref(),
+            character.as_ref()
         );
 
         self.client.get("get_items", url).await
@@ -98,15 +117,15 @@ impl PathOfExile {
 
     pub async fn get_passives(
         &self,
-        account_name: &str,
-        character: &str,
+        account_name: impl AsRef<str>,
+        character: impl AsRef<str>,
         skill_tree_data: bool,
     ) -> PoeResult<PassivesResponse> {
         let url = &format!(
             "{}/character-window/get-passive-skills?accountName={}&character={}&reqData={}",
             WEB_DOMAIN,
-            account_name,
-            character,
+            account_name.as_ref(),
+            character.as_ref(),
             if skill_tree_data { 1 } else { 0 }
         );
 
@@ -124,14 +143,19 @@ impl PathOfExile {
 
     pub async fn ladder(
         &self,
-        name: &str,
+        name: impl AsRef<str>,
         limit: usize,
         offset: usize,
     ) -> PoeResult<LadderResponse> {
         self.client
             .get(
                 "ladder",
-                &format!("/ladders/{}?limit={}&offset={}", name, limit, offset),
+                &format!(
+                    "/ladders/{}?limit={}&offset={}",
+                    name.as_ref(),
+                    limit,
+                    offset
+                ),
             )
             .await
     }
@@ -140,6 +164,14 @@ impl PathOfExile {
 #[cfg(test)]
 mod tests {
     use super::PathOfExile;
+
+    #[tokio::test]
+    async fn get_characters() {
+        let poe = PathOfExile::new();
+
+        let characters = poe.get_characters("Steelmage").await.unwrap();
+        characters.iter().find(|c| c.name == "SteelDD").unwrap();
+    }
 
     #[tokio::test]
     async fn get_items() {
