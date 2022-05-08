@@ -367,6 +367,8 @@ pub struct SkillTreeNode {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ascendancy_name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub group: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub orbit: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub orbit_index: Option<u32>,
