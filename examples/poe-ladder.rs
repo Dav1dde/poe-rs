@@ -1,9 +1,9 @@
-use clap::Clap;
+use clap::Parser;
 use futures::stream::TryStreamExt;
 use poe_api::page::PagedStream;
 use poe_api::{PathOfExile, PoeError};
 
-#[derive(Clap)]
+#[derive(Parser)]
 struct Args {
     /// Path of Exile league name
     league: String,

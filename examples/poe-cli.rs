@@ -1,7 +1,7 @@
-use clap::Clap;
+use clap::Parser;
 use poe_api::{PathOfExile, PoeError};
 
-#[derive(Clap)]
+#[derive(Parser)]
 struct Opts {
     #[clap(short, long, parse(from_occurrences))]
     verbose: u32,
@@ -10,7 +10,7 @@ struct Opts {
     subcmd: SubCommand,
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 enum SubCommand {
     /// Character items
     Items(Items),
@@ -18,7 +18,7 @@ enum SubCommand {
     Passives(Passives),
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 struct Items {
     /// Account name
     account: String,
@@ -26,7 +26,7 @@ struct Items {
     character: String,
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 struct Passives {
     /// Account name
     account: String,
