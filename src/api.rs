@@ -1,8 +1,9 @@
 use chrono::{DateTime, NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 use crate::utils::{empty_array_is_map, is_false, is_zero, string_or_u32};
+
+pub use std::collections::HashMap as Map;
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct ItemsResponse {
@@ -29,8 +30,8 @@ pub struct Item {
     pub league: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
-    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
-    pub influences: HashMap<String, bool>,
+    #[serde(default, skip_serializing_if = "Map::is_empty")]
+    pub influences: Map<String, bool>,
     #[serde(default, skip_serializing_if = "is_false")]
     pub elder: bool,
     #[serde(default, skip_serializing_if = "is_false")]
@@ -220,7 +221,7 @@ pub struct PassivesResponse {
     #[serde(default)]
     pub hashes_ex: Vec<u32>,
     #[serde(default, deserialize_with = "empty_array_is_map")]
-    pub jewel_data: HashMap<String, JewelData>,
+    pub jewel_data: Map<String, JewelData>,
     #[serde(rename = "skillTreeData")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub skill_tree_data: Option<SkillTreeData>,
@@ -242,18 +243,20 @@ pub struct JewelData {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct JewelDataSubgraph {
-    groups: HashMap<String, SkillTreeGroup>,
-    nodes: HashMap<String, SkillTreeNode>,
+    groups: Map<String, SkillTreeGroup>,
+    nodes: Map<String, SkillTreeNode>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SkillTreeData {
-    pub assets: HashMap<String, HashMap<String, String>>,
+    /// Optional/missing since 3.18.1/3.19
+    #[serde(default, skip_serializing_if = "Map::is_empty")]
+    pub assets: Map<String, Map<String, String>>,
     pub classes: Vec<SkillTreeClass>,
     pub constants: SkillTreeConstants,
     #[serde(rename = "extraImages")]
-    pub extra_images: HashMap<String, SkillTreeExtraImage>,
-    pub groups: HashMap<String, SkillTreeGroup>,
+    pub extra_images: Map<String, SkillTreeExtraImage>,
+    pub groups: Map<String, SkillTreeGroup>,
     #[serde(rename = "imageZoomLevels")]
     pub image_zoom_levels: Vec<f32>,
     #[serde(rename = "jewelSlots")]
@@ -262,9 +265,14 @@ pub struct SkillTreeData {
     pub max_y: f32,
     pub min_x: f32,
     pub min_y: f32,
-    pub nodes: HashMap<String, SkillTreeNode>,
-    #[serde(rename = "skillSprites")]
-    pub skill_sprites: HashMap<String, Vec<SkillTreeSprite>>,
+    pub nodes: Map<String, SkillTreeNode>,
+    /// Optional/missing since 3.18.1/3.19
+    #[serde(
+        default,
+        rename = "skillSprites",
+        skip_serializing_if = "Map::is_empty"
+    )]
+    pub skill_sprites: Map<String, Vec<SkillTreeSprite>>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -290,9 +298,9 @@ pub struct SkillTreeAscendancy {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SkillTreeConstants {
-    pub classes: HashMap<String, u32>,
+    pub classes: Map<String, u32>,
     #[serde(rename = "characterAttributes")]
-    pub character_attributes: HashMap<String, u32>,
+    pub character_attributes: Map<String, u32>,
     #[serde(rename = "PSSCentreInnerRadius")]
     pub pss_centre_inner_radius: u32,
     #[serde(rename = "skillsPerOrbit")]
@@ -388,7 +396,7 @@ pub struct ExpansionJewel {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SkillTreeSprite {
     pub filename: String,
-    pub coords: HashMap<String, SkillTreeSpriteCoords>,
+    pub coords: Map<String, SkillTreeSpriteCoords>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
