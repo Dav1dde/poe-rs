@@ -126,7 +126,7 @@ impl PathOfExile {
             WEB_DOMAIN,
             account_name.as_ref(),
             character.as_ref(),
-            if skill_tree_data { 1 } else { 0 }
+            i32::from(skill_tree_data)
         );
 
         self.client.get("get_passives", url).await

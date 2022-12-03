@@ -360,6 +360,8 @@ pub struct SkillTreeNode {
     pub granted_passive_points: u32,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub stats: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub mastery_effects: Vec<MasteryEffect>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub class_start_index: Option<u32>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -391,6 +393,16 @@ pub struct ExpansionJewel {
     pub size: u32,
     pub index: u32,
     pub proxy: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MasteryEffect {
+    pub effect: u32,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub stats: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub reminder_text: Vec<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -448,7 +460,7 @@ impl Default for LadderResponse {
     fn default() -> Self {
         Self {
             total: 0,
-            cached_since: DateTime::from_utc(NaiveDateTime::from_timestamp(0, 0), Utc),
+            cached_since: DateTime::from_utc(NaiveDateTime::from_timestamp_opt(0, 0).unwrap(), Utc),
             entries: Vec::default(),
         }
     }

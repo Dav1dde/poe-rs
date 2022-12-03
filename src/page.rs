@@ -71,7 +71,7 @@ where
                 break;
             }
 
-            this.worker_queue.push((this.pager)(PageRequest {
+            this.worker_queue.push_back((this.pager)(PageRequest {
                 limit: this.limit,
                 offset,
             }));
