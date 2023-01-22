@@ -161,7 +161,7 @@ impl History {
 
                 let mut calls = self.calls.lock().unwrap();
                 if let Some(time) = calls.front() {
-                    let x = Instant::now() - self.duration;
+                    let x = Instant::now().checked_sub(self.duration).unwrap();
                     if x > *time {
                         calls.pop_front();
                         self.active.fetch_sub(1, Ordering::SeqCst);

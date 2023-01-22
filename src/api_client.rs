@@ -136,7 +136,7 @@ impl PathOfExile {
         self.client
             .get(
                 "leagues",
-                &format!("/leagues?limit={}&offset={}", limit, offset),
+                &format!("/leagues?limit={limit}&offset={offset}"),
             )
             .await
     }
