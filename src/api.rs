@@ -340,6 +340,12 @@ pub struct SkillTreeNode {
     pub name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub icon: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inactive_icon: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub active_icon: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub active_effect_image: Option<String>,
     #[serde(default, skip_serializing_if = "is_false")]
     pub is_mastery: bool,
     #[serde(default, skip_serializing_if = "is_false")]
