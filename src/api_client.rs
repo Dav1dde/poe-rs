@@ -165,6 +165,7 @@ impl PathOfExile {
 mod tests {
     use super::PathOfExile;
 
+    #[ignore]
     #[tokio::test]
     async fn get_characters() {
         let poe = PathOfExile::new();
@@ -173,6 +174,7 @@ mod tests {
         characters.iter().find(|c| c.name == "SteelDD").unwrap();
     }
 
+    #[ignore]
     #[tokio::test]
     async fn get_items() {
         let poe = PathOfExile::new();
@@ -182,6 +184,7 @@ mod tests {
         assert_eq!(17, items.items.len());
     }
 
+    #[ignore]
     #[tokio::test]
     async fn get_passives() {
         let poe = PathOfExile::new();
@@ -194,6 +197,7 @@ mod tests {
         assert!(passives.skill_tree_data.is_none());
     }
 
+    #[ignore]
     #[tokio::test]
     async fn get_passives_with_data() {
         let poe = PathOfExile::new();
@@ -206,6 +210,7 @@ mod tests {
         assert!(passives.skill_tree_data.is_some());
     }
 
+    #[ignore]
     #[tokio::test]
     async fn leagues() {
         let poe = PathOfExile::new();

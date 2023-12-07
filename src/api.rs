@@ -253,6 +253,8 @@ pub struct SkillTreeData {
     #[serde(default, skip_serializing_if = "Map::is_empty")]
     pub assets: Map<String, Map<String, String>>,
     pub classes: Vec<SkillTreeClass>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub alternate_ascendancies: Vec<SkillTreeAscendancy>,
     pub constants: SkillTreeConstants,
     #[serde(rename = "extraImages")]
     pub extra_images: Map<String, SkillTreeExtraImage>,
@@ -466,7 +468,10 @@ impl Default for LadderResponse {
     fn default() -> Self {
         Self {
             total: 0,
-            cached_since: DateTime::from_utc(NaiveDateTime::from_timestamp_opt(0, 0).unwrap(), Utc),
+            cached_since: DateTime::from_naive_utc_and_offset(
+                NaiveDateTime::from_timestamp_opt(0, 0).unwrap(),
+                Utc,
+            ),
             entries: Vec::default(),
         }
     }
