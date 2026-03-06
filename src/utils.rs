@@ -72,6 +72,44 @@ where
     deserializer.deserialize_any(NumVisitor)
 }
 
+pub(crate) fn string_vec<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    struct NumVisitor;
+
+    impl<'de> Visitor<'de> for NumVisitor {
+        type Value = Vec<String>;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("expected an array of numbers")
+        }
+
+        fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+        where
+            A: SeqAccess<'de>,
+        {
+            #[derive(Deserialize)]
+            #[serde(untagged)]
+            enum StringOrNumber {
+                String(String),
+                Number(u64),
+            }
+
+            let mut result = Vec::new();
+            while let Some(next) = seq.next_element::<StringOrNumber>()? {
+                match next {
+                    StringOrNumber::String(s) => result.push(s),
+                    StringOrNumber::Number(n) => result.push(n.to_string()),
+                }
+            }
+            Ok(result)
+        }
+    }
+
+    deserializer.deserialize_seq(NumVisitor)
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

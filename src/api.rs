@@ -1,7 +1,7 @@
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::utils::{empty_array_is_map, is_false, is_zero, string_or_u32};
+use crate::utils::{empty_array_is_map, is_false, is_zero, string_or_u32, string_vec};
 
 pub use std::collections::HashMap as Map;
 
@@ -252,16 +252,17 @@ pub struct SkillTreeData {
     /// Optional/missing since 3.18.1/3.19
     #[serde(default, skip_serializing_if = "Map::is_empty")]
     pub assets: Map<String, Map<String, String>>,
+    #[serde(default)] // Missing since 3.28
     pub classes: Vec<SkillTreeClass>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub alternate_ascendancies: Vec<SkillTreeAscendancy>,
     pub constants: SkillTreeConstants,
-    #[serde(rename = "extraImages")]
+    #[serde(default, rename = "extraImages")]
     pub extra_images: Map<String, SkillTreeExtraImage>,
     pub groups: Map<String, SkillTreeGroup>,
-    #[serde(rename = "imageZoomLevels")]
+    #[serde(default, rename = "imageZoomLevels")]
     pub image_zoom_levels: Vec<f32>,
-    #[serde(rename = "jewelSlots")]
+    #[serde(default, rename = "jewelSlots")]
     pub jewel_slots: Vec<u32>,
     pub max_x: f32,
     pub max_y: f32,
@@ -300,8 +301,12 @@ pub struct SkillTreeAscendancy {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SkillTreeConstants {
+    #[serde(default, deserialize_with = "empty_array_is_map")]
     pub classes: Map<String, u32>,
-    #[serde(rename = "characterAttributes")]
+    #[serde(
+        rename = "characterAttributes",
+        deserialize_with = "empty_array_is_map"
+    )]
     pub character_attributes: Map<String, u32>,
     #[serde(rename = "PSSCentreInnerRadius")]
     pub pss_centre_inner_radius: u32,
@@ -328,6 +333,7 @@ pub struct SkillTreeGroup {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub proxy: Option<String>,
     pub orbits: Vec<u32>,
+    #[serde(deserialize_with = "string_vec")]
     pub nodes: Vec<String>,
 }
 
@@ -393,7 +399,15 @@ pub struct SkillTreeNode {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub out: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub connections: Vec<Connection>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub r#in: Vec<String>,
+}
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+pub struct Connection {
+    pub id: u32,
+    pub orbit: i32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -468,10 +482,7 @@ impl Default for LadderResponse {
     fn default() -> Self {
         Self {
             total: 0,
-            cached_since: DateTime::from_naive_utc_and_offset(
-                NaiveDateTime::from_timestamp_opt(0, 0).unwrap(),
-                Utc,
-            ),
+            cached_since: DateTime::from_timestamp(0, 0).unwrap(),
             entries: Vec::default(),
         }
     }
